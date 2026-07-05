@@ -4,20 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Happy Birthday Nandini!</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --bg-light: #eef5f9;
+            --bg-gradient: linear-gradient(180deg, #e0f2fe 0%, #f0f9ff 50%, #ffffff 100%);
             --text-dark: #1a252f;
-            --accent: #3498db;
-            --card-bg: #ffffff;
-            --pink-accent: #ff6b81;
+            --accent-blue: #3b82f6;
+            --accent-pink: #f43f5e;
+            --card-bg: rgba(255, 255, 255, 0.95);
         }
 
         body {
             margin: 0; padding: 0;
             font-family: 'Poppins', sans-serif;
-            background: var(--bg-light) url('https://www.transparenttextures.com/patterns/clouds.png');
+            background: var(--bg-gradient);
+            background-attachment: fixed;
             color: var(--text-dark);
             overflow-x: hidden;
             scroll-behavior: smooth;
@@ -25,111 +30,155 @@
 
         h1, h2, h3, .serif { font-family: 'Playfair Display', serif; }
 
-        /* Lock Screen */
+        /* --- BACKGROUND ANIMATIONS --- */
+        .cloud-texture {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/clouds.png');
+            opacity: 0.4; z-index: -3; pointer-events: none;
+            animation: drift 60s linear infinite;
+        }
+        @keyframes drift { from { background-position: 0 0; } to { background-position: 1000px 500px; } }
+
+        .floating-element {
+            position: fixed; z-index: -1; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+            animation: floatUp linear infinite; opacity: 0.7; pointer-events: none;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* --- LOCK SCREEN --- */
         #lock-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-            background: var(--bg-light);
+            background: var(--bg-gradient);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 1000; transition: opacity 0.8s ease; text-align: center;
+            z-index: 2000; transition: opacity 0.8s ease; text-align: center;
         }
-        .pin-hint { font-size: 14px; color: #666; margin-bottom: 20px; }
-        .dots-container { display: flex; gap: 12px; margin-bottom: 30px; }
-        .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--accent); }
-        .dot.active { background: var(--accent); }
-        .keypad { display: grid; grid-template-columns: repeat(3, 70px); gap: 20px; }
+        .pin-hint { font-size: 14px; color: #555; margin-bottom: 30px; background: rgba(255,255,255,0.8); padding: 8px 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);}
+        .dots-container { display: flex; gap: 15px; margin-bottom: 40px; }
+        .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--accent-blue); }
+        .dot.active { background: var(--accent-blue); }
+        .keypad { display: grid; grid-template-columns: repeat(3, 75px); gap: 20px; }
         .key { 
-            width: 70px; height: 70px; border-radius: 50%; border: none; 
-            background: #fff; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            cursor: pointer; transition: 0.2s;
+            width: 75px; height: 75px; border-radius: 50%; border: none; 
+            background: #fff; font-size: 26px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            cursor: pointer; transition: 0.2s; font-family: 'Poppins', sans-serif; color: #333;
         }
-        .key:active { background: #e0e0e0; transform: scale(0.95); }
+        .key:active { transform: scale(0.9); background: #f0f0f0; }
 
-        /* Main Content Container */
-        #main-content { display: none; max-width: 600px; margin: 0 auto; padding: 0 20px; }
-        
-        .section { padding: 50px 0; border-bottom: 1px solid rgba(0,0,0,0.05); text-align: center; }
-        .section-title { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #888; }
-        .section-heading { font-size: 32px; margin: 10px 0 20px; color: var(--text-dark); }
+        /* --- MAIN CONTENT --- */
+        #main-content { display: none; max-width: 600px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 10; }
+        .section { padding: 70px 0; border-bottom: 1px solid rgba(0,0,0,0.05); text-align: center; }
+        .section-title { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: #888; margin-bottom: 10px; }
+        .section-heading { font-size: 38px; margin: 0 0 25px; color: var(--text-dark); }
 
         /* Hero */
-        .hero { padding: 80px 0 40px; text-align: center; position: relative; }
-        .hero h1 { font-size: 3.5em; color: var(--accent); margin: 10px 0; }
-        .badge { display: inline-block; padding: 5px 15px; background: #fff; border-radius: 20px; font-size: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .hero { padding: 120px 0 50px; text-align: center; }
+        .hero h1 { font-size: 4.5em; color: var(--accent-blue); margin: 0; line-height: 1.2; text-shadow: 0 5px 15px rgba(59, 130, 246, 0.2);}
+        .badge { display: inline-block; padding: 6px 20px; background: #fff; border-radius: 30px; font-size: 14px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 20px; font-weight: 500;}
 
-        /* Polaroids */
-        .polaroid-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 20px; }
-        .polaroid { 
-            background: #fff; padding: 10px 10px 30px 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            border-radius: 4px; width: 140px; text-align: center; font-size: 12px;
-            font-family: 'Playfair Display', serif; font-style: italic;
-        }
-        .polaroid img { width: 100%; height: 140px; object-fit: cover; border-radius: 2px; margin-bottom: 10px; }
-        .p-left { transform: rotate(-3deg); }
-        .p-right { transform: rotate(3deg); }
-
-        /* Camera Reveal */
-        .camera-btn { font-size: 80px; cursor: pointer; transition: 0.3s; margin: 20px 0; display: inline-block; }
+        /* Camera Section */
+        .camera-container { position: relative; width: 160px; height: 160px; margin: 20px auto 40px; display: flex; justify-content: center; align-items: center; }
+        .dashed-circle { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 2px dashed #93c5fd; border-radius: 50%; animation: spin 15s linear infinite; pointer-events: none; }
+        .camera-btn { font-size: 80px; cursor: pointer; transition: 0.3s; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15)); z-index: 2;}
         .camera-btn:active { transform: scale(0.9); }
-        #revealed-photos .polaroid { display: none; margin: 10px auto; width: 200px; animation: popIn 0.5s ease forwards; }
-        #revealed-photos .polaroid img { height: 200px; }
+        
+        #revealed-photos { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .polaroid { 
+            background: #fff; padding: 15px 15px 50px 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border-radius: 6px; width: 250px; display: none; position: relative;
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .polaroid img { width: 100%; height: 250px; object-fit: cover; border-radius: 4px; background: #eee;}
+        .polaroid p { position: absolute; bottom: 15px; width: 100%; left: 0; margin: 0; font-family: 'Playfair Display', serif; font-style: italic; font-size: 18px; text-align: center; color: #333;}
 
-        /* Cake Slicing */
-        .cake-container { display: flex; justify-content: center; align-items: center; cursor: crosshair; margin: 30px 0; }
-        .cake-half { width: 90px; height: 120px; background: var(--pink-accent); border: 4px solid #fff; transition: 0.8s ease; }
-        .cake-left { border-radius: 15px 0 0 15px; border-right: none; }
-        .cake-right { border-radius: 0 15px 15px 0; border-left: none; }
-        .cut-active .cake-left { transform: translateX(-20px) rotate(-10deg); }
-        .cut-active .cake-right { transform: translateX(20px) rotate(10deg); }
+        /* Cake Section */
+        .cake-interactive-area { height: 250px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: pointer; margin: 30px 0;}
+        .knife { position: absolute; top: -60px; font-size: 50px; opacity: 0; z-index: 20; transition: all 0.4s ease-in; transform: rotate(-20deg); pointer-events: none;}
+        .cake-graphic { display: flex; align-items: flex-end; position: relative; z-index: 10; }
+        .cake-half { width: 90px; height: 110px; background-color: #d81b60; position: relative; transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .cake-half::before { content: ''; position: absolute; top: 0; width: 100%; height: 30px; background: #fff; }
+        .cake-left { border-radius: 15px 0 0 10px; border-right: 1px solid rgba(255,255,255,0.5); }
+        .cake-right { border-radius: 0 15px 10px 0; border-left: 1px solid rgba(255,255,255,0.5); }
+        
+        .cutting .knife { opacity: 1; top: 20px; transform: rotate(0deg); }
+        .cut-active .cake-left { transform: translateX(-40px) rotate(-10deg); }
+        .cut-active .cake-right { transform: translateX(40px) rotate(10deg); }
+        .cut-active .knife { opacity: 0; }
+        
+        .cake-emojis { position: absolute; bottom: 10px; opacity: 0; font-size: 35px; transform: translateY(20px); transition: all 0.8s ease 0.3s; }
+        .cut-active ~ .cake-emojis { opacity: 1; transform: translateY(0); }
 
         /* Spotify Widget */
-        .spotify-container { border-radius: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin: 20px 0; }
+        .spotify-container { border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin: 30px auto; background: #fff;}
 
-        /* Candle Wish */
-        .candle-container { margin: 40px 0; cursor: pointer; }
-        .candle { width: 40px; height: 100px; background: #fff; margin: 0 auto; border-radius: 5px; position: relative; box-shadow: inset -5px 0 10px rgba(0,0,0,0.05); }
+        /* Gallery Grid */
+        .polaroid-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+        .small-polaroid { background: #fff; padding: 10px 10px 35px 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); width: 130px; border-radius: 4px;}
+        .small-polaroid img { width: 100%; height: 130px; object-fit: cover; background: #eee;}
+
+        /* --- FIX: Candle Section --- */
+        .candle-container { 
+            margin: 60px auto; 
+            cursor: pointer; 
+            width: 100px; 
+            height: 160px; 
+            position: relative; 
+            z-index: 999; /* High z-index to avoid overlap */
+            display: flex; 
+            justify-content: center;
+            touch-action: manipulation; /* Improves touch response on mobile */
+        }
+        .candle-stick { 
+            width: 40px; height: 100px; background: linear-gradient(to right, #fff, #f0f0f0); 
+            position: absolute; bottom: 0; border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            border: 1px solid #e2e8f0; pointer-events: none;
+        }
+        .candle-stick::before { content:''; position:absolute; top:-10px; left:18px; width:4px; height:10px; background:#333; }
         .flame { 
-            width: 20px; height: 35px; background: #ff9d00; border-radius: 50% 50% 20% 20%; 
-            position: absolute; top: -40px; left: 10px; box-shadow: 0 0 20px #ff9d00; 
-            animation: flicker 1s infinite alternate; transition: 0.3s;
+            width: 22px; height: 38px; background: #ff9d00; border-radius: 50% 50% 20% 20%; 
+            position: absolute; top: 12px; box-shadow: 0 0 30px #ffea00; 
+            animation: flicker 1s infinite alternate; transition: all 0.3s ease; 
+            pointer-events: none;
         }
-        .flame-out { opacity: 0; transform: scale(0); }
-        #wish-text { opacity: 0; transition: 1s; margin-top: 20px; font-size: 18px; color: var(--accent); font-weight: 500;}
+        .flame-out { opacity: 0 !important; transform: scale(0) !important; }
+        #wish-text { opacity: 0; transition: 1s; font-size: 20px; color: var(--accent-pink); margin-top: 10px;}
 
-        /* Letter */
-        .letter { 
-            background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            text-align: left; line-height: 1.8; position: relative;
-        }
-        .letter::before { content: ''; position: absolute; left: 15px; top: 0; bottom: 0; width: 2px; background: rgba(255,107,129,0.3); }
+        /* Love Letter */
+        .letter { background: var(--card-bg); padding: 40px 30px; border-radius: 16px; text-align: left; line-height: 1.9; box-shadow: 0 15px 35px rgba(0,0,0,0.05); backdrop-filter: blur(10px); position: relative;}
+        .letter::before { content: ''; position: absolute; left: 0; top: 30px; bottom: 30px; width: 4px; background: var(--accent-pink); border-radius: 0 4px 4px 0;}
 
-        /* Flip Cards (Wishes) */
-        .wishes-grid { display: flex; flex-direction: column; gap: 15px; }
-        .flip-card { background-color: transparent; height: 120px; perspective: 1000px; cursor: pointer; }
-        .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
+        /* Wishes Flip Cards */
+        .wishes-grid { display: flex; flex-direction: column; gap: 20px; }
+        .flip-card { background-color: transparent; height: 140px; perspective: 1000px; cursor: pointer; }
+        .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
         .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
-        .flip-card-front, .flip-card-back { 
-            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: #fff; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 15px; box-sizing: border-box;
-        }
-        .flip-card-front { font-size: 30px; color: #888; }
-        .flip-card-front span { font-size: 12px; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px;}
-        .flip-card-back { transform: rotateY(180deg); font-size: 14px; font-style: italic; color: var(--text-dark); }
+        .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); padding: 20px; box-sizing: border-box;}
+        .flip-card-front { font-size: 35px; color: #aaa; }
+        .flip-card-front span { font-size: 11px; margin-top: 10px; text-transform: uppercase; letter-spacing: 2px; color: #888; font-family: 'Poppins', sans-serif;}
+        .flip-card-back { transform: rotateY(180deg); font-size: 15px; font-style: italic; color: var(--text-dark); line-height: 1.6;}
 
-        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
-        @keyframes flicker { 0% { transform: scale(1); } 100% { transform: scale(1.05) translateY(-2px); } }
-        
-        .floating { position: absolute; animation: float 6s ease-in-out infinite; opacity: 0.6; font-size: 30px;}
-        @keyframes float { 0% { transform: translateY(0); } 50% { transform: translateY(-20px); } 100% { transform: translateY(0); } }
-
+        /* Keyframes */
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8) translateY(40px) rotate(-5deg); } 100% { opacity: 1; transform: scale(1) translateY(0) rotate(0deg); } }
+        @keyframes flicker { 0% { transform: scale(1); opacity: 0.9;} 100% { transform: scale(1.05) translateY(-2px); opacity: 1;} }
     </style>
 </head>
 <body>
 
+    <div class="cloud-texture"></div>
+    <div class="floating-element" style="font-size: 60px; left: 10%; animation-duration: 20s;">☁️</div>
+    <div class="floating-element" style="font-size: 80px; right: 15%; animation-duration: 25s; animation-delay: 2s;">☁️</div>
+    <div class="floating-element" style="font-size: 40px; left: 40%; animation-duration: 18s; animation-delay: 5s;">🎈</div>
+    <div class="floating-element" style="font-size: 40px; right: 30%; animation-duration: 22s; animation-delay: 8s;">✨</div>
+
     <div id="lock-screen">
-        <h2 class="serif">A little surprise awaits</h2>
-        <h1 style="color: var(--text-dark); margin: 0 0 10px;">For Nandini</h1>
-        <p class="pin-hint">🔑 The day this story secretly started (250707)</p>
+        <h2 class="serif" style="margin-bottom: 5px;">A little surprise awaits</h2>
+        <h1 class="serif" style="color: var(--accent-blue); margin: 0 0 25px; font-size: 45px;">For Nandini</h1>
+        <div class="pin-hint">🔑 The day this story secretly started (250707)</div>
         
         <div class="dots-container" id="dots">
             <div class="dot"></div><div class="dot"></div><div class="dot"></div>
@@ -146,7 +195,7 @@
             <button class="key" onclick="enterDigit(7)">7</button>
             <button class="key" onclick="enterDigit(8)">8</button>
             <button class="key" onclick="enterDigit(9)">9</button>
-            <button class="key" onclick="clearDigit()" style="font-size:16px;">Del</button>
+            <button class="key" onclick="clearDigit()" style="font-size:16px; background:#f8f9fa;">Del</button>
             <button class="key" onclick="enterDigit(0)">0</button>
             <div></div>
         </div>
@@ -155,145 +204,123 @@
     <div id="main-content">
         
         <div class="hero">
-            <div class="floating" style="top: 20%; left: 10%;">🎈</div>
-            <div class="floating" style="top: 60%; right: 10%; animation-delay: 2s;">🎁</div>
-            <div class="section-title">A birthday made just for you</div>
-            <h1>Nandini</h1>
+            <div class="section-title" style="color: var(--accent-blue);">A birthday made just for you</div>
+            <h1 class="serif">Nandini</h1>
             <div class="badge">🎂 2026 🎂</div>
-            <p class="serif" style="margin-top: 20px; font-size: 18px;">Wishing you a very Happy Birthday, Nandini !🎉</p>
+            <p class="serif" style="margin-top: 35px; font-size: 18px; color: #555;">11 little memories. One very special person.<br><strong style="color: var(--text-dark); font-size: 20px;">Happy Birthday, Nandini ✨</strong></p>
         </div>
 
         <div class="section">
             <div class="section-title">Captured Moments</div>
-            <h2 class="section-heading">Press for a memory</h2>
-            <div class="camera-btn" onclick="revealPhoto()">📸</div>
-            <p id="cam-hint" style="font-size: 14px; color: #888;">Tap the camera • 5 memories left</p>
+            <h2 class="section-heading serif">Press for a memory</h2>
+            
+            <div class="camera-container">
+                <div class="dashed-circle"></div>
+                <div class="camera-btn" onclick="revealPhoto()">📸</div>
+            </div>
+            <p id="cam-hint" style="font-size: 14px; color: #888; font-style: italic;">Tap the camera • 5 memories left</p>
             
             <div id="revealed-photos">
-                <div class="polaroid p-left"><img src="pic1.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Photo+1'">Caption 1 ✨</div>
-                <div class="polaroid p-right"><img src="pic2.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Photo+2'">Caption 2 💖</div>
-                <div class="polaroid p-left"><img src="pic3.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Photo+3'">Caption 3 🌸</div>
-                <div class="polaroid p-right"><img src="pic4.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Photo+4'">Caption 4 🥺</div>
-                <div class="polaroid p-left"><img src="pic5.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Photo+5'">Caption 5 ❤️</div>
+                <div class="polaroid" style="transform: rotate(-3deg);"><img src="pic1.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Photo+1'"><p>Main character 💋</p></div>
+                <div class="polaroid" style="transform: rotate(2deg);"><img src="pic2.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Photo+2'"><p>Too cool ✌️</p></div>
+                <div class="polaroid" style="transform: rotate(-2deg);"><img src="pic3.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Photo+3'"><p>Ocean energy 🌊</p></div>
+                <div class="polaroid" style="transform: rotate(3deg);"><img src="pic4.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Photo+4'"><p>Serving looks 🖤</p></div>
+                <div class="polaroid" style="transform: rotate(-1deg);"><img src="pic5.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Photo+5'"><p>Favorite person 🥰</p></div>
             </div>
         </div>
 
         <div class="section">
             <div class="section-title">A Sweet Little Ritual</div>
-            <h2 class="section-heading">Cut the cake</h2>
-            <p style="font-size: 12px; color: #888;">🔪 Tap the cake to slice it</p>
-            <div class="cake-container" id="cake" onclick="cutCake()">
-                <div class="cake-half cake-left"></div>
-                <div class="cake-half cake-right"></div>
+            <h2 class="section-heading serif">Cut the cake</h2>
+            <p style="font-size: 14px; color: #888; font-style: italic;">🔪 Tap the cake to slice it</p>
+            
+            <div class="cake-interactive-area" id="cake-wrapper" onclick="cutCake()">
+                <div class="knife" id="knife">🔪</div>
+                <div class="cake-graphic" id="cake">
+                    <div class="cake-half cake-left"><div style="position:absolute; top:-30px; right: 5px; font-size:30px;">🍓</div></div>
+                    <div class="cake-half cake-right"><div style="position:absolute; top:-30px; left: 5px; font-size:30px; transform: scaleX(-1);">🌿</div></div>
+                </div>
+                <div class="cake-emojis">🍰 🍰 🎂</div>
             </div>
-            <p class="serif" id="cake-msg" style="opacity: 0; transition: 1s;">A slice for you, a slice for me ✨</p>
-        </div>
 
+            <p class="serif" id="cake-msg" style="opacity: 0; transition: 1s; font-size: 20px; color: var(--accent-pink);">A slice for you, a slice for me ✨</p>
+        </div>
+        
         <div class="section">
             <div class="section-title">Our Song</div>
-            <h2 class="section-heading">Press play for me</h2>
+            <h2 class="section-heading serif">Press play for me</h2>
             <div class="spotify-container">
-                <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/0tgVpDi06RnAWUQ1NdN2K4?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                <iframe style="border-radius:16px" src="https://open.spotify.com/embed/track/0tgVpDi06RnAWUQ1NdN2K4?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
             </div>
         </div>
 
         <div class="section">
             <div class="section-title">A Little Gallery</div>
-            <h2 class="section-heading">Us, in pictures</h2>
+            <h2 class="section-heading serif">Us, in pictures</h2>
             <div class="polaroid-grid">
-                <div class="polaroid p-left"><img src="gal1.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Us+1'"></div>
-                <div class="polaroid p-right"><img src="gal2.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Us+2'"></div>
-                <div class="polaroid p-left"><img src="gal3.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Us+3'"></div>
-                <div class="polaroid p-right"><img src="gal4.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Us+4'"></div>
-                <div class="polaroid p-left"><img src="gal5.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Us+5'"></div>
-                <div class="polaroid p-right"><img src="gal6.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Us+6'"></div>
+                <div class="small-polaroid" style="transform: rotate(-3deg);"><img src="gal1.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Us+1'"></div>
+                <div class="small-polaroid" style="transform: rotate(3deg);"><img src="gal2.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Us+2'"></div>
+                <div class="small-polaroid" style="transform: rotate(-2deg);"><img src="gal3.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Us+3'"></div>
+                <div class="small-polaroid" style="transform: rotate(4deg);"><img src="gal4.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Us+4'"></div>
+                <div class="small-polaroid" style="transform: rotate(-4deg);"><img src="gal5.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Us+5'"></div>
+                <div class="small-polaroid" style="transform: rotate(2deg);"><img src="gal6.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Us+6'"></div>
             </div>
         </div>
 
         <div class="section">
             <div class="section-title">A Birthday Ritual</div>
-            <h2 class="section-heading">Make a wish</h2>
-            <p style="font-size: 14px; font-style: italic;">Close your eyes • think of something beautiful • then tap the candle</p>
-            <div class="candle-container" onclick="blowCandle()">
-                <div class="candle">
-                    <div class="flame" id="flame"></div>
-                </div>
+            <h2 class="section-heading serif">Make a wish</h2>
+            <p style="font-size: 14px; font-style: italic; color: #666; max-width: 280px; margin: 0 auto;">Close your eyes • think of something beautiful • then tap the candle</p>
+            
+            <div class="candle-container" onclick="blowCandle()" ontouchstart="blowCandle()">
+                <div class="flame" id="flame"></div>
+                <div class="candle-stick"></div>
             </div>
-            <p id="wish-text" class="serif">Your wish is off to the stars ✨</p>
+            
+            <p id="wish-text" class="serif">Your wish is off to the stars 🌸</p>
         </div>
 
         <div class="section">
             <div class="section-title">From My Heart</div>
-            <h2 class="section-heading">A note for you</h2>
+            <h2 class="section-heading serif">A note for you</h2>
             <div class="letter">
-                <h3 style="color: var(--accent); margin-top: 0;">My dearest Nandini,</h3>
+                <h3 class="serif" style="color: var(--accent-blue); margin-top: 0; font-size: 24px;">My dearest Nandini,</h3>
                 <p>I don't say this enough, but having you in my life means a lot...</p>
                 <p>You bring so much happiness just by being yourself.</p>
                 <p>On your birthday, I just want you to know how appreciated you are.</p>
                 <p>I hope this year brings you everything you deserve ❤️</p>
                 <p>Happy Birthday, Nandini. You deserve the best always 💫 & you are always the most special person in my life ❤️</p>
-                <h3 style="text-align: right; color: var(--pink-accent); font-style: italic; margin-bottom: 0;">Forever yours,<br>Krishna</h3>
+                <h3 class="serif" style="text-align: right; color: var(--accent-pink); font-style: italic; margin-top: 40px; font-size: 22px;">Forever yours,<br>Krishna</h3>
             </div>
         </div>
-
+        
         <div class="section">
             <div class="section-title">Wishes For You</div>
-            <h2 class="section-heading">Everything I hope you get</h2>
-            
+            <h2 class="section-heading serif">Everything I hope you get</h2>
             <div class="wishes-grid">
-                <div class="flip-card" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        <div class="flip-card-front">🌟<span>Tap to reveal</span></div>
-                        <div class="flip-card-back">May every single day bring you something that makes your soul light up</div>
-                    </div>
-                </div>
-                <div class="flip-card" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        <div class="flip-card-front">🌸<span>Tap to reveal</span></div>
-                        <div class="flip-card-back">Adventures that take your breath away — for exactly the right reasons</div>
-                    </div>
-                </div>
-                <div class="flip-card" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        <div class="flip-card-front">💖<span>Tap to reveal</span></div>
-                        <div class="flip-card-back">Love that is consistent, warm, and completely certain of you</div>
-                    </div>
-                </div>
-                <div class="flip-card" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        <div class="flip-card-front">☕<span>Tap to reveal</span></div>
-                        <div class="flip-card-back">Perfect coffee, slow mornings, and exactly the peace you deserve</div>
-                    </div>
-                </div>
-                <div class="flip-card" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        <div class="flip-card-front">🐱<span>Tap to reveal</span></div>
-                        <div class="flip-card-back">All the cat cuddles your heart could ever desire, whenever you need them</div>
-                    </div>
-                </div>
-                <div class="flip-card" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        <div class="flip-card-front">✨<span>Tap to reveal</span></div>
-                        <div class="flip-card-back">A year so good it makes every year before feel like the warm-up</div>
-                    </div>
-                </div>
+                <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-card-inner"><div class="flip-card-front">🌟<span>Tap to reveal</span></div><div class="flip-card-back">May every single day bring you something that makes your soul light up</div></div></div>
+                <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-card-inner"><div class="flip-card-front">🌸<span>Tap to reveal</span></div><div class="flip-card-back">Adventures that take your breath away — for exactly the right reasons</div></div></div>
+                <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-card-inner"><div class="flip-card-front">💖<span>Tap to reveal</span></div><div class="flip-card-back">Love that is consistent, warm, and completely certain of you</div></div></div>
+                <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-card-inner"><div class="flip-card-front">☕<span>Tap to reveal</span></div><div class="flip-card-back">Perfect coffee, slow mornings, and exactly the peace you deserve</div></div></div>
+                <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-card-inner"><div class="flip-card-front">🐱<span>Tap to reveal</span></div><div class="flip-card-back">All the cat cuddles your heart could ever desire, whenever you need them</div></div></div>
+                <div class="flip-card" onclick="this.classList.toggle('flipped')"><div class="flip-card-inner"><div class="flip-card-front">✨<span>Tap to reveal</span></div><div class="flip-card-back">A year so good it makes every year before feel like the warm-up</div></div></div>
             </div>
         </div>
 
-        <div class="section" style="border: none; padding-bottom: 80px;">
-            <h1 style="color: var(--accent);">Just for you, Nandini.</h1>
-            <p style="font-size: 14px; color: #666; font-style: italic;">No matter where life takes us, I hope you never forget this: You are loved. You are appreciated.</p>
-            <h3 style="margin-top: 40px; color: var(--text-dark);">With all my love, Krishna ❤️</h3>
-            <div class="section-title" style="margin-top: 30px;">Happy Birthday • You are so loved always</div>
+        <div class="section" style="border: none; padding-bottom: 100px;">
+            <h1 class="serif" style="color: var(--accent-blue); font-size: 40px;">Just for you, Nandini.</h1>
+            <p style="font-size: 15px; color: #666; font-style: italic; max-width: 85%; margin: 0 auto; line-height: 1.6;">No matter where life takes us, I hope you never forget this: You are loved. You are appreciated.</p>
+            <h3 class="serif" style="margin-top: 50px; color: var(--text-dark); font-size: 26px;">With all my love, Krishna ❤️</h3>
+            <div class="section-title" style="margin-top: 40px; font-size: 10px;">Happy Birthday • You are so loved always</div>
         </div>
 
     </div>
 
     <script>
-        // PASSCODE LOGIC (6 Digits)
+        // --- 1. PASSCODE LOGIC ---
         let enteredCode = "";
         const CORRECT_CODE = "250707";
-
+        
         function updateDots() {
             const dots = document.querySelectorAll('.dot');
             dots.forEach((dot, index) => {
@@ -301,44 +328,44 @@
                 else dot.classList.remove('active');
             });
         }
-
+        
         function enterDigit(digit) {
-            if (enteredCode.length < 6) {
-                enteredCode += digit;
-                updateDots();
+            if (enteredCode.length < 6) { 
+                enteredCode += digit; 
+                updateDots(); 
             }
             if (enteredCode.length === 6) {
-                setTimeout(checkCode, 300);
+                setTimeout(checkCode, 200);
             }
         }
-
-        function clearDigit() {
-            enteredCode = enteredCode.slice(0, -1);
-            updateDots();
+        
+        function clearDigit() { 
+            enteredCode = enteredCode.slice(0, -1); 
+            updateDots(); 
         }
-
+        
         function checkCode() {
             if (enteredCode === CORRECT_CODE) {
                 document.getElementById('lock-screen').style.opacity = '0';
+                confetti({ particleCount: 150, spread: 80, origin: { y: 0.3 } });
                 setTimeout(() => {
                     document.getElementById('lock-screen').style.display = 'none';
                     document.getElementById('main-content').style.display = 'block';
                     window.scrollTo(0,0);
                 }, 800);
             } else {
-                alert("Incorrect PIN! Hint: 250707");
-                enteredCode = "";
+                alert("Incorrect PIN! Hint: 250707"); 
+                enteredCode = ""; 
                 updateDots();
             }
         }
 
-        // CAMERA LOGIC
+        // --- 2. CAMERA REVEAL LOGIC ---
         let photoCount = 0;
-        const totalPhotos = 5;
+        const totalPhotos = 5; 
         function revealPhoto() {
             const photos = document.querySelectorAll('#revealed-photos .polaroid');
             const hint = document.getElementById('cam-hint');
-            
             if (photoCount < totalPhotos) {
                 photos[photoCount].style.display = 'block';
                 photoCount++;
@@ -351,18 +378,39 @@
             }
         }
 
-        // CAKE LOGIC
+        // --- 3. CAKE CUT LOGIC ---
+        let cakeCut = false;
         function cutCake() {
-            document.getElementById('cake').classList.add('cut-active');
-            document.getElementById('cake-msg').style.opacity = '1';
+            if (!cakeCut) {
+                let wrapper = document.getElementById('cake-wrapper');
+                wrapper.classList.add('cutting');
+                
+                setTimeout(() => {
+                    document.getElementById('cake').classList.add('cut-active');
+                    document.getElementById('cake-msg').style.opacity = '1';
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                }, 400); 
+                
+                cakeCut = true;
+            }
         }
 
-        // CANDLE LOGIC
+        // --- 4. CANDLE WISH LOGIC (FIXED) ---
         let wished = false;
         function blowCandle() {
             if (!wished) {
                 document.getElementById('flame').classList.add('flame-out');
                 document.getElementById('wish-text').style.opacity = '1';
+                
+                // Big confetti explosion
+                var end = Date.now() + (2 * 1000);
+                var colors = ['#f43f5e', '#3b82f6', '#ffffff'];
+                (function frame() {
+                    confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: colors });
+                    confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: colors });
+                    if (Date.now() < end) { requestAnimationFrame(frame); }
+                }());
+                
                 wished = true;
             }
         }
